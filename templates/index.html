@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mental Health Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --lavender: #c0aed9;
+            --lavender-light: #d0c2e8;
+            --lavender-dark: #a897c5;
+            --peach: #f2d8cc;
+            --peach-text: #d4967a;
+            --black: #1a1a1a;
+            --white: #ffffff;
+            --green: #4a9460;
+            --green-dark: #357048;
+        }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--lavender);
+            min-height: 100vh;
+            color: var(--black);
+        }
+
+        /* NAV */
+        nav {
+            background: var(--white);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            height: 72px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            font-weight: 900;
+            font-size: 15px;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--black);
+        }
+
+        .nav-brand span {
+            display: block;
+        }
+
+        .nav-brand .underline {
+            border-bottom: 2px solid var(--black);
+            display: inline-block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 32px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: var(--black);
+            border-left: 1px solid #e0e0e0;
+            transition: background 0.15s;
+        }
+
+        .nav-links a:hover { background: #f5f5f5; }
+
+        .nav-links a.sos {
+            background: var(--black);
+            color: var(--white);
+            border-left: none;
+        }
+
+        .nav-links a.sos:hover { background: #333; }
+
+        /* HERO */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            padding: 60px 60px 80px;
+            min-height: calc(100vh - 72px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-text h1 {
+            font-family: 'Barlow', sans-serif;
+            font-weight: 900;
+            font-size: clamp(52px, 6vw, 88px);
+            line-height: 1.0;
+            letter-spacing: -2px;
+            margin-bottom: 28px;
+            color: var(--black);
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.6;
+            max-width: 440px;
+            color: #222;
+            margin-bottom: 36px;
+        }
+
+        /* FORM */
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255,255,255,0.55);
+            border: 2px solid var(--black);
+            border-radius: 0;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: background 0.15s;
+        }
+
+        .file-label:hover { background: rgba(255,255,255,0.75); }
+
+        .file-label input[type="file"] { display: none; }
+
+        .file-name {
+            font-weight: 400;
+            font-size: 13px;
+            color: #555;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .btn-analyze {
+            background: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            padding: 16px 32px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            align-self: flex-start;
+        }
+
+        .btn-analyze:hover {
+            background: transparent;
+            color: var(--black);
+        }
+
+        /* BLOB */
+        .blob-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .blob {
+            width: min(440px, 40vw);
+            height: min(400px, 38vw);
+            background: var(--peach);
+            border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: morph 6s ease-in-out infinite;
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; }
+            33%       { border-radius: 45% 55% 42% 58% / 55% 48% 52% 45%; }
+            66%       { border-radius: 52% 48% 60% 40% / 44% 56% 44% 56%; }
+        }
+
+        .breathe-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--peach-text);
+            letter-spacing: 0.06em;
+            text-transform: lowercase;
+            animation: breathe 6s ease-in-out infinite;
+            user-select: none;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.7; content: "breathe in"; }
+            50%       { opacity: 1; }
+        }
+
+        /* RESULTS SECTION */
+        .results-section {
+            background: var(--white);
+            padding: 60px;
+        }
+
+        .results-section h2 {
+            font-weight: 900;
+            font-size: 40px;
+            letter-spacing: -1px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .result-card {
+            border: 2px solid var(--black);
+            padding: 28px;
+        }
+
+        .result-card h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .result-card .value {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .extracted-card {
+            grid-column: 1 / -1;
+            border: 2px solid var(--black);
+            padding: 28px;
+        }
+
+        .extracted-card pre {
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            background: #f5f3ef;
+            padding: 18px;
+            border-radius: 0;
+            color: #333;
+            margin-top: 12px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        /* BARS */
+        .likelihoods-section {
+            margin-top: 40px;
+        }
+
+        .likelihoods-section h3 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .bar-row {
+            margin-bottom: 14px;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .bar-track {
+            height: 10px;
+            background: #e8e2f0;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--black);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* SCROLL ARROW */
+        .scroll-arrow {
+            position: absolute;
+            bottom: 28px;
+            right: 40px;
+            font-size: 24px;
+            color: var(--black);
+            opacity: 0.5;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(6px); }
+        }
+
+        /* POPUP MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 10, 30, 0.65);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--white);
+            max-width: 560px;
+            width: 100%;
+            padding: 48px 44px 40px;
+            position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(24px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 1;
+            padding: 4px 8px;
+            transition: color 0.15s;
+        }
+
+        .modal-close:hover { color: var(--black); }
+
+        .modal-stat {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--lavender-dark);
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            font-size: 16px;
+            line-height: 1.75;
+            color: #444;
+            margin-bottom: 28px;
+        }
+
+        .modal-cta {
+            font-family: 'Barlow', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            color: var(--black);
+            margin-bottom: 32px;
+        }
+
+        .modal-btn {
+            display: inline-block;
+            background: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            padding: 14px 32px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .modal-btn:hover {
+            background: transparent;
+            color: var(--black);
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        /* CONDITION CARD SECTION */
+        .conditions-section {
+            background: var(--lavender);
+            padding: 70px 60px;
+        }
+
+        .conditions-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--lavender-dark);
+            margin-bottom: 24px;
+        }
+
+        .condition-card {
+            background: var(--white);
+            border: 2px solid var(--black);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .condition-header {
+            padding: 36px 52px;
+            border-bottom: 2px solid var(--black);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--white);
+        }
+
+        .condition-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .condition-header h2 {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--black);
+            margin: 0 0 6px 0;
+            text-transform: uppercase;
+        }
+
+        .condition-tagline {
+            font-size: 18px;
+            color: #777;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .condition-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .condition-col {
+            padding: 40px 52px;
+            border-bottom: 1px solid #e8e2f0;
+        }
+
+        .condition-col:last-child { border-bottom: none; }
+
+        .condition-col-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--lavender-dark);
+            margin-bottom: 18px;
+        }
+
+        .condition-text {
+            font-size: 18px;
+            line-height: 1.85;
+            color: #333;
+            margin: 0;
+        }
+
+        .condition-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .condition-list li {
+            font-size: 18px;
+            color: #333;
+            line-height: 1.6;
+            padding-left: 22px;
+            position: relative;
+        }
+
+        .condition-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 11px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--lavender-dark);
+        }
+
+        .condition-links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .condition-links a {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: none;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.45;
+            transition: color 0.15s;
+        }
+
+        .condition-links a:hover { color: var(--lavender-dark); }
+
+        .condition-links a::before {
+            content: '→';
+            flex-shrink: 0;
+            margin-top: 2px;
+            color: var(--lavender-dark);
+        }
+
+        @media (max-width: 800px) {
+            .conditions-section { padding: 40px 28px; }
+            .condition-header { padding: 28px 28px; }
+            .condition-col { padding: 28px 28px; }
+        }
+
+        @media (max-width: 800px) {
+            .hero { grid-template-columns: 1fr; padding: 40px 28px 60px; }
+            .blob-container { display: none; }
+            .results-grid { grid-template-columns: 1fr; }
+            .results-section { padding: 40px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- POPUP MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cta">
+        <button class="modal-close" id="modalClose" aria-label="Close">&#x2715;</button>
+        <p class="modal-stat">Mental Health — By the numbers</p>
+        <p class="modal-body">
+            Over 1 in 5 U.S. adults (59.3 million) live with a mental illness, with nearly 1 in 20 experiencing serious mental illness. These conditions cause significant impact — including over 49,000 suicide deaths annually, roughly 50 million people experiencing behavioral health issues, and high barriers to care that leave roughly 25% of adults with mental illness untreated.
+        </p>
+        <p class="modal-cta" id="modal-cta">Make sure your friends aren't one of them.</p>
+        <button class="modal-btn" id="modalDismiss">I understand &rarr;</button>
+    </div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-brand">
+        <div>
+            <span><span class="underline">Signal</span>Sense</span>
+        </div>
+    </div>
+
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-text">
+        <h1>We all have<br>mental health</h1>
+        <p>Our emotional health can range from thriving to struggling. No matter what you're experiencing, there are ways to take action to support yourself and those around you.</p>
+
+        <form class="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+            <label class="file-label">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Upload screenshot</span>
+                <span class="file-name" id="fname">No file chosen</span>
+                <input type="file" name="image" accept="image/*" required id="fileInput">
+            </label>
+            <button type="submit" class="btn-analyze">Analyze Screenshot</button>
+        </form>
+    </div>
+
+    <div class="blob-container">
+        <div class="blob">
+            <span class="breathe-text" id="breatheText">breathe out</span>
+        </div>
+    </div>
+
+    <span class="scroll-arrow">↓</span>
+</section>
+
+<!-- RESULTS (Jinja2 conditional block preserved) -->
+{% if extracted_text %}
+<section class="results-section">
+    <h2>Analysis Results</h2>
+
+    <div class="results-grid">
+        <div class="result-card">
+            <h3>Category</h3>
+            <div class="value">{{ category }}</div>
+        </div>
+
+        <div class="result-card">
+            <h3>Risk Level</h3>
+            <div class="value">{{ risk }}</div>
+        </div>
+
+        <div class="extracted-card">
+            <h3>Extracted Text</h3>
+            <pre>{{ extracted_text }}</pre>
+        </div>
+    </div>
+
+    <div class="likelihoods-section">
+        <h3>Likelihoods</h3>
+        {% for label, prob in likelihoods.items() %}
+        <div class="bar-row">
+            <div class="bar-label">
+                <span>{{ label }}</span>
+                <span>{{ (prob * 100) | round(1) }}%</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" style="width: {{ prob * 100 }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+
+
+{% if extracted_text and category and category|lower != 'normal' %}
+<section class="conditions-section">
+
+    <p class="conditions-label">Detected Condition</p>
+
+    {% if category|lower == 'anxiety' %}
+    <div class="condition-card">
+        <div class="condition-header">
+            <div class="condition-dot" style="background:#a897c5;"></div>
+            <div>
+                <h2>Anxiety</h2>
+                <p class="condition-tagline">Persistent worry and fear that feels hard to switch off</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Anxiety is more than everyday stress — it's a persistent, excessive worry that's hard to control. It can show up as constant fear, racing thoughts, physical tension, avoiding situations, and catastrophic thinking even when there's no real threat. It's one of the most common mental health conditions and very treatable.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do for them</p>
+                <ul class="condition-list">
+                    <li>Listen without dismissing — don't say "just relax" or "calm down"</li>
+                    <li>Help them ground themselves with the 5 senses exercise</li>
+                    <li>Breathe slowly together — it genuinely helps regulate the nervous system</li>
+                    <li>Gently suggest talking to a doctor or therapist</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources</p>
+                <div class="condition-links">
+                    <a href="https://adaa.org" target="_blank">ADAA — Anxiety & Depression Association</a>
+                    <a href="https://www.nimh.nih.gov/health/topics/anxiety-disorders" target="_blank">NIMH — Anxiety Disorders</a>
+                    <a href="https://www.calm.com" target="_blank">Calm — Breathing & meditation app</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif category|lower == 'bipolar' %}
+    <div class="condition-card">
+        <div class="condition-header">
+            <div class="condition-dot" style="background:#7B5EA7;"></div>
+            <div>
+                <h2>Bipolar Disorder</h2>
+                <p class="condition-tagline">Extreme mood swings between emotional highs and deep lows</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Bipolar disorder causes dramatic shifts in mood, energy, and activity — from manic episodes (elevated mood, reduced sleep, impulsive decisions) to depressive episodes (hopelessness, fatigue, withdrawal). These aren't just mood swings; they're intense, lasting episodes that significantly impact daily life.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do for them</p>
+                <ul class="condition-list">
+                    <li>Stay consistent — routine and stability are genuinely helpful</li>
+                    <li>Don't take manic behavior personally; recognize it as a symptom</li>
+                    <li>Gently flag concerning behavior without confrontation</li>
+                    <li>Encourage them to stay connected with their treatment plan</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources</p>
+                <div class="condition-links">
+                    <a href="https://www.dbsalliance.org" target="_blank">DBSA — Depression & Bipolar Support Alliance</a>
+                    <a href="https://www.nami.org/About-Mental-Illness/Mental-Health-Conditions/Bipolar-Disorder" target="_blank">NAMI — Bipolar Disorder Guide</a>
+                    <a href="https://www.nimh.nih.gov/health/topics/bipolar-disorder" target="_blank">NIMH — Bipolar Overview</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif category|lower == 'depression' %}
+    <div class="condition-card">
+        <div class="condition-header">
+            <div class="condition-dot" style="background:#4A3570;"></div>
+            <div>
+                <h2>Depression</h2>
+                <p class="condition-tagline">More than sadness — a persistent heaviness that dims everything</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Depression isn't just feeling sad — it's a persistent low mood, loss of interest in things once enjoyed, low energy, trouble concentrating, and often feelings of worthlessness or hopelessness. It can make even small tasks feel impossible and affects how a person thinks, feels, and functions every day.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do for them</p>
+                <ul class="condition-list">
+                    <li>Check in regularly — isolation makes depression worse</li>
+                    <li>Offer small, low-pressure things to do together</li>
+                    <li>Avoid telling them to "cheer up" or "think positive"</li>
+                    <li>Help them take the first step toward professional support</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources</p>
+                <div class="condition-links">
+                    <a href="https://www.nami.org/About-Mental-Illness/Mental-Health-Conditions/Depression" target="_blank">NAMI — Depression Guide</a>
+                    <a href="https://www.nimh.nih.gov/health/topics/depression" target="_blank">NIMH — Depression Facts</a>
+                    <a href="https://www.7cups.com" target="_blank">7 Cups — Free emotional support chat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif category|lower == 'personality disorder' %}
+    <div class="condition-card">
+        <div class="condition-header">
+            <div class="condition-dot" style="background:#c0aed9;"></div>
+            <div>
+                <h2>Personality Disorder</h2>
+                <p class="condition-tagline">Deep patterns in thinking and relating that cause ongoing distress</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Personality disorders involve long-standing patterns of thinking, feeling, and behaving that differ significantly from cultural expectations and cause distress or problems in daily life. Types include borderline, narcissistic, and avoidant personality disorders, among others. They often stem from early experiences and are treatable with the right therapy.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do for them</p>
+                <ul class="condition-list">
+                    <li>Stay calm and consistent — unpredictability can worsen symptoms</li>
+                    <li>Set clear, compassionate boundaries for yourself</li>
+                    <li>Don't diagnose or label them — focus on how they feel</li>
+                    <li>Encourage therapy, especially DBT which is highly effective</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources</p>
+                <div class="condition-links">
+                    <a href="https://www.nami.org/About-Mental-Illness/Mental-Health-Conditions/Borderline-Personality-Disorder" target="_blank">NAMI — Personality Disorder Guide</a>
+                    <a href="https://www.nimh.nih.gov/health/topics/borderline-personality-disorder" target="_blank">NIMH — BPD Overview</a>
+                    <a href="https://www.dbtselfhelp.com" target="_blank">DBT Self Help — skills & resources</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif category|lower == 'stress' %}
+    <div class="condition-card">
+        <div class="condition-header">
+            <div class="condition-dot" style="background:#d4967a;"></div>
+            <div>
+                <h2>Stress</h2>
+                <p class="condition-tagline">An overloaded system struggling to keep up with demands</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Stress is the body and mind's response to pressure or overwhelming demands. While some stress is normal, chronic or intense stress takes a real toll — on sleep, physical health, decision-making, and relationships. Left unaddressed, it can develop into anxiety or depression.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do for them</p>
+                <ul class="condition-list">
+                    <li>Ask what's weighing on them — sometimes being heard is enough</li>
+                    <li>Help them identify what's in and out of their control</li>
+                    <li>Encourage breaks, rest, and movement where possible</li>
+                    <li>Offer practical help if the stress is situation-based</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources</p>
+                <div class="condition-links">
+                    <a href="https://www.apa.org/topics/stress" target="_blank">APA — Stress & Coping Resources</a>
+                    <a href="https://www.headspace.com" target="_blank">Headspace — Stress & mindfulness app</a>
+                    <a href="https://www.mentalhealth.org.uk/explore-mental-health/a-z-topics/stress" target="_blank">Mental Health Foundation — Stress guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% elif category|lower == 'suicidal' %}
+    <div class="condition-card" style="border-color:#1a1a1a;">
+        <div class="condition-header" style="border-color:#1a1a1a;background:#1a1a1a;">
+            <div class="condition-dot" style="background:#f2d8cc;"></div>
+            <div>
+                <h2 style="color:#ffffff;">Suicidal Ideation</h2>
+                <p class="condition-tagline" style="color:#c0aed9;">This is serious — please act now, not later</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-col-label">What it is</p>
+                <p class="condition-text">Suicidal ideation means having thoughts about ending one's life. It ranges from passive thoughts like "I wish I wasn't here" to active planning. Any expression of this should be taken seriously — never assume it's for attention. Asking directly about suicide does not put the idea in someone's head; it shows you care.</p>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">What you can do right now</p>
+                <ul class="condition-list">
+                    <li><strong>Ask directly:</strong> "Are you thinking about suicide?" — it helps</li>
+                    <li>Stay with them. Don't leave them alone if risk feels immediate</li>
+                    <li>Listen without judgment — don't try to fix or argue</li>
+                    <li>Call or text 988 together — it's free, confidential, 24/7</li>
+                </ul>
+            </div>
+            <div class="condition-col">
+                <p class="condition-col-label">Resources — act now</p>
+                <div class="condition-links">
+                    <a href="https://988lifeline.org" target="_blank" style="font-size:16px;font-weight:900;">988 Suicide & Crisis Lifeline — call or text 988</a>
+                    <a href="https://www.crisistextline.org" target="_blank">Crisis Text Line — text HOME to 741741</a>
+                    <a href="https://afsp.org" target="_blank">AFSP — American Foundation for Suicide Prevention</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</section>
+{% endif %}
+
+{% if extracted_text and category and category|lower == 'normal' %}
+<section class="conditions-section">
+    <div class="condition-card" style="max-width:820px;border-color:#4a9460;">
+        <div class="condition-header" style="background:#f0faf3;border-color:#4a9460;">
+            <div class="condition-dot" style="background:#4a9460;"></div>
+            <div>
+                <h2 style="color:#2e5e38;">No Significant Signals Detected</h2>
+                <p class="condition-tagline" style="color:#4a9460;">The text appears within a normal emotional range</p>
+            </div>
+        </div>
+        <div class="condition-body">
+            <div class="condition-col">
+                <p class="condition-text">The analysis didn't detect strong indicators of a mental health condition in this screenshot. That said, a single message can't tell the whole story — if you're still concerned about someone, trust your instincts and reach out to them directly.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<script>
+    const overlay = document.getElementById('modalOverlay');
+    document.getElementById('modalClose').addEventListener('click', () => overlay.classList.add('hidden'));
+    document.getElementById('modalDismiss').addEventListener('click', () => overlay.classList.add('hidden'));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('hidden'); });
+
+    const fileInput = document.getElementById('fileInput');
+    const fname = document.getElementById('fname');
+    fileInput.addEventListener('change', () => {
+        fname.textContent = fileInput.files[0]?.name || 'No file chosen';
+    });
+
+    const breatheText = document.getElementById('breatheText');
+    let breatheIn = false;
+    setInterval(() => {
+        breatheIn = !breatheIn;
+        breatheText.textContent = breatheIn ? 'breathe in' : 'breathe out';
+    }, 4000);
+</script>
+
+</body>
+</html>
