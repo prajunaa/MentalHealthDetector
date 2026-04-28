@@ -8,7 +8,6 @@ Presentation/Slides: Satyanarayana Rudraraju<br>
 Designed for early-stage screening and insight, not diagnosis.
 
 **Categories**<br>
-
 Anxiety • Depression • Stress • Suicidal • Bipolar • Personality Disorder • Normal <br>
 (Normal category in order to avoid false positives and prove we can recognize when nothing is wrong).
 
