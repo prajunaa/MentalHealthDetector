@@ -12,7 +12,8 @@ Anxiety • Depression • Stress • Suicidal • Bipolar • Personality Disor
 
 ```mermaid
 graph TD
-A[User Input] --> B[Clean & Tokenize]
-B --> C[Vectorize]
-C --> D[ML Model]
-D --> E[Predictions + Probabilities]
+A[User Input] --> B[Extract Text from Image]
+B --> C[Clean & Tokenize]
+C --> D[Vectorize]
+D --> E[ML Model]
+E --> F[Predictions + Probabilities]
