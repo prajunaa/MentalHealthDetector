@@ -2,7 +2,7 @@
 
 Backend (ML/Pipeline) + API: Arjun Prabhakaran<br>
 Frontend: Abhinav Balaganesh<br>
-Connect/Implementation/Showcase: Satyanarayana Rudraraju<br>
+Connecting Frontend and Backend/Implementation/Showcase: Satyanarayana Rudraraju<br>
 
 **Analyzes user text and predicts mental health categories with probability scores.**<br>
 Designed for early-stage screening and insight, not diagnosis.
